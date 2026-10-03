@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual Apartment</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e9e4da'/%3E%3Cpath d='M14 32 32 16l18 16v16H14z' fill='%23a9b8a3'/%3E%3Crect x='28' y='36' width='8' height='12' fill='%23f7f5f0'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <!-- 3D canvas goes here -->
+    <div id="app"></div>
+
+    <!-- Heads-up display -->
+    <div id="crosshair"></div>
+    <div id="tooltip"></div>
+    <div id="hint"></div>
+    <canvas id="minimap" width="200" height="160"></canvas>
+    <div id="toast"></div>
+    <div id="resume">Click to resume</div>
+
+    <!-- Toolbar (visible when the pointer is unlocked) -->
+    <div id="toolbar"></div>
+
+    <!-- Start screen -->
+    <div id="start-screen" class="overlay">
+      <div class="card">
+        <h1>Virtual Apartment</h1>
+        <p class="sub">A 2-bedroom, 1-bath apartment (75 m²). Walk around and rearrange it.</p>
+        <div class="cheats" id="start-cheats"></div>
+        <button id="start-btn" class="primary-btn">Click to start</button>
+      </div>
+    </div>
+
+    <!-- Panels -->
+    <div id="library-panel" class="panel hidden"></div>
+    <div id="materials-panel" class="panel hidden"></div>
+    <div id="help-panel" class="panel hidden"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
