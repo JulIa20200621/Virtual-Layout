@@ -43,8 +43,12 @@ export class Player {
     this.controls.addEventListener('unlock', () => this.keys.clear());
   }
 
+  /**
+   * Read the browser's pointer-lock state directly. (PointerLockControls fires its
+   * 'lock' event *before* updating its own isLocked flag, which caused stale UI.)
+   */
   get isLocked() {
-    return this.controls.isLocked;
+    return document.pointerLockElement === this.controls.domElement;
   }
 
   lock() {
@@ -58,7 +62,7 @@ export class Player {
   }
 
   unlock() {
-    if (this.controls.isLocked) this.controls.unlock();
+    if (this.isLocked) this.controls.unlock();
   }
 
   /** Is the circle at (x, z) free of obstacles? */
@@ -73,7 +77,7 @@ export class Player {
   }
 
   update(dt) {
-    if (!this.controls.isLocked || !this.enabled) return;
+    if (!this.isLocked || !this.enabled) return;
     const k = this.keys;
     let fwd = 0;
     let side = 0;

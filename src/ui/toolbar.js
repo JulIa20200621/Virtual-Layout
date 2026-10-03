@@ -8,6 +8,7 @@ export function createToolbar(actions) {
     { id: 'library', label: 'Library', key: 'B' },
     { id: 'materials', label: 'Materials', key: 'M' },
     { id: 'daynight', label: 'Night', key: 'N' },
+    { id: 'photo', label: 'Photo', key: 'P' },
     'sep',
     { id: 'undo', label: 'Undo', key: 'Ctrl+Z' },
     { id: 'redo', label: 'Redo', key: 'Ctrl+Y' },

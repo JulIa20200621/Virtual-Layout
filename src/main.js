@@ -213,6 +213,7 @@ const toolbar = createToolbar({
   },
   import: importLayout,
   reset: resetLayout,
+  photo: enterPhotoMode,
   help: () => togglePanel('help'),
 });
 
@@ -231,9 +232,44 @@ refreshToolbar();
 
 // ─── Pointer lock & mouse ──────────────────────────────────────────────────
 let started = false;
+let photoMode = false;
 
 function updateMode() {
   hud.setMode({ locked: player.isLocked, started, panelOpen: anyPanelOpen() });
+  document.body.classList.toggle('photo', photoMode);
+}
+
+// ─── Photo mode: hide all UI, keep walking / looking; click saves a picture, Esc exits ───
+function enterPhotoMode() {
+  if (photoMode) return;
+  if (interaction.isHolding) interaction.cancel();
+  interaction.resetHover();
+  closePanels();
+  photoMode = true;
+  hud.hideStart();
+  started = true;
+  if (!player.isLocked) player.lock();
+  updateMode();
+  hud.toast('Photo mode · click to save a picture · Esc to exit', 2500);
+}
+
+function exitPhotoMode() {
+  if (!photoMode) return;
+  photoMode = false;
+  updateMode();
+}
+
+function takePhoto() {
+  renderer.render(scene, camera); // render right before reading the canvas
+  const url = renderer.domElement.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `apartment-photo-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.png`;
+  a.click();
+  const flash = document.getElementById('photo-flash');
+  flash.classList.remove('go');
+  void flash.offsetWidth; // restart the CSS animation
+  flash.classList.add('go');
 }
 
 player.controls.addEventListener('lock', () => {
@@ -242,7 +278,11 @@ player.controls.addEventListener('lock', () => {
   closePanels();
   updateMode();
 });
-player.controls.addEventListener('unlock', updateMode);
+player.controls.addEventListener('unlock', () => {
+  // Esc releases the mouse (the browser handles it), which also ends photo mode.
+  if (photoMode) exitPhotoMode();
+  updateMode();
+});
 
 document.getElementById('start-btn').addEventListener('click', (e) => {
   e.stopPropagation();
@@ -257,6 +297,10 @@ renderer.domElement.addEventListener('click', () => {
 
 document.addEventListener('mousedown', (e) => {
   if (!player.isLocked) return;
+  if (photoMode) {
+    if (e.button === 0) takePhoto();
+    return;
+  }
   if (e.button === 0) interaction.primaryAction();
   else if (e.button === 2) interaction.cancel();
 });
@@ -266,6 +310,15 @@ document.addEventListener('contextmenu', (e) => e.preventDefault());
 window.addEventListener('keydown', (e) => {
   if (isTyping(e)) return;
   const ctrl = e.ctrlKey || e.metaKey;
+
+  // In photo mode only Esc (exit), N (day/night) and P (toggle) do anything.
+  if (photoMode) {
+    if (e.code === 'Escape' || e.code === 'KeyP') {
+      exitPhotoMode();
+      player.unlock();
+    } else if (e.code === 'KeyN') toggleDayNight();
+    return;
+  }
 
   if (ctrl && e.code === 'KeyZ') {
     e.preventDefault();
@@ -292,6 +345,9 @@ window.addEventListener('keydown', (e) => {
       break;
     case 'KeyN':
       toggleDayNight();
+      break;
+    case 'KeyP':
+      enterPhotoMode();
       break;
     case 'KeyQ':
       interaction.rotate(-1);
@@ -321,19 +377,22 @@ renderer.setAnimationLoop((time) => {
   timer.update(time);
   const dt = Math.min(timer.getDelta(), 0.05);
   player.update(dt);
-  interaction.update(player.isLocked);
+  interaction.update(player.isLocked && !photoMode);
   lighting.update(dt);
 
-  if (player.isLocked) {
+  if (photoMode) {
+    hud.setTooltip('');
+    hud.setHint('');
+  } else if (player.isLocked) {
     hud.setTooltip(interaction.tooltip());
     hud.setHint(interaction.hint());
   } else {
     hud.setTooltip('');
     hud.setHint(started ? 'Click to resume · B library · M materials · N day/night · Ctrl+Z undo' : '');
   }
-  minimap.draw(camera, interaction.isHolding ? interaction.held.item.uid : null);
+  if (!photoMode) minimap.draw(camera, interaction.isHolding ? interaction.held.item.uid : null);
   renderer.render(scene, camera);
 });
 
 // Handy for debugging in the browser console.
-window.app = { scene, camera, manager, history, roomMaterials, lighting, interaction, placement, materialsPanel, togglePanel, resetLayout };
+window.app = { scene, camera, manager, history, roomMaterials, lighting, interaction, placement, materialsPanel, togglePanel, resetLayout, enterPhotoMode, exitPhotoMode };

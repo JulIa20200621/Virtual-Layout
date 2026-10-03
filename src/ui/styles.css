@@ -424,3 +424,32 @@ input[type='color'] {
   color: var(--muted);
   font-size: 13px;
 }
+
+/* ── Photo mode: only the room is visible ────────────────────────────── */
+body.photo #crosshair,
+body.photo #tooltip,
+body.photo #hint,
+body.photo #minimap,
+body.photo #toolbar,
+body.photo #resume,
+body.photo .panel {
+  display: none !important;
+}
+#photo-flash {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+#photo-flash.go {
+  animation: photo-flash 0.35s ease-out;
+}
+@keyframes photo-flash {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0;
+  }
+}

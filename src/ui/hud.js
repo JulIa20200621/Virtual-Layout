@@ -15,6 +15,7 @@ export const CONTROLS = [
   ['B', 'Furniture library'],
   ['M', 'Materials (floors, walls, colors)'],
   ['N', 'Day / night'],
+  ['P', 'Photo mode (no UI · click saves a picture · Esc exits)'],
   ['Ctrl+Z / Ctrl+Y', 'Undo / redo'],
   ['Esc', 'Release mouse · show menu'],
 ];
