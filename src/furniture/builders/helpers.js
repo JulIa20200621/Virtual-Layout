@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getWoodTexture, getFabricTexture } from './textures.js';
 
 /**
  * Small helpers for assembling furniture out of primitives.
@@ -18,6 +19,16 @@ export function primary(color, opts = {}) {
   return m;
 }
 
+/** Recolorable upholstery (woven fabric texture). */
+export function fabric(color, opts = {}) {
+  return primary(color, { roughness: 0.95, map: getFabricTexture(), ...opts });
+}
+
+/** Recolorable wood (grain texture), e.g. table tops. */
+export function woodPrimary(color, opts = {}) {
+  return primary(color, { roughness: 0.55, map: getWoodTexture(), ...opts });
+}
+
 /** Regular material. */
 export function mat(color, opts = {}) {
   return new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...opts });
@@ -25,7 +36,7 @@ export function mat(color, opts = {}) {
 
 /** Common materials, created fresh per item so highlights don't leak between items. */
 export function woodMat() {
-  return mat('#c9a77c', { roughness: 0.6 });
+  return mat('#d6b68c', { roughness: 0.6, map: getWoodTexture() });
 }
 export function darkMat() {
   return mat('#3b3a38', { roughness: 0.5 });

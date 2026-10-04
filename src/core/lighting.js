@@ -5,9 +5,9 @@ const DAY = {
   sky: new THREE.Color('#cfe3f2'),
   hemiSky: new THREE.Color('#eef4fa'),
   hemiGround: new THREE.Color('#e3d9c9'),
-  hemi: 1.0,
-  env: 0.55,
-  sun: 3.2,
+  hemi: 0.55,
+  env: 0.38,
+  sun: 6.5,
 };
 const NIGHT = {
   sky: new THREE.Color('#0b1430'),
@@ -41,22 +41,24 @@ export class Lighting {
     this.hemi = new THREE.HemisphereLight(DAY.hemiSky, DAY.hemiGround, DAY.hemi);
     scene.add(this.hemi);
 
-    // Sun from the south-west, low enough to shine through the south windows.
+    // Warm, low afternoon sun from the south-west: long light patches through the windows.
     const center = new THREE.Vector3(PLAN.width / 2, 0, PLAN.depth / 2);
-    this.sun = new THREE.DirectionalLight('#fff1dc', DAY.sun);
-    this.sun.position.copy(center).add(new THREE.Vector3(-4, 8, 9));
+    this.sun = new THREE.DirectionalLight('#ffd49c', DAY.sun);
+    this.sun.position.copy(center).add(new THREE.Vector3(-3.5, 6, 10));
     this.sun.target.position.copy(center);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.shadow.mapSize.set(4096, 4096);
     const sc = this.sun.shadow.camera;
-    sc.left = -9;
-    sc.right = 9;
-    sc.top = 9;
-    sc.bottom = -9;
+    sc.left = -11;
+    sc.right = 11;
+    sc.top = 11;
+    sc.bottom = -11;
     sc.near = 1;
-    sc.far = 30;
-    this.sun.shadow.bias = -0.0004;
-    this.sun.shadow.normalBias = 0.02;
+    sc.far = 40;
+    this.sun.shadow.bias = -0.0003;
+    this.sun.shadow.normalBias = 0.025;
+    this.sun.shadow.radius = 5; // soft shadow edges (PCF)
+    this.sun.shadow.blurSamples = 16;
     scene.add(this.sun, this.sun.target);
 
     // Ceiling lights: one per room at the room's center.

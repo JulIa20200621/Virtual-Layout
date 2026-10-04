@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ROT_STEP } from './placement.js';
+import { NO_AO_LAYER } from '../core/scene.js';
 import { addCommand, deleteCommand, moveCommand } from '../state/history.js';
 
 const DEG = Math.PI / 180;
@@ -286,10 +287,12 @@ function setGhost(item, ghostMat, on) {
       o.material = ghostMat;
       o.castShadow = false;
       o.renderOrder = 5;
+      o.layers.set(NO_AO_LAYER); // translucent ghost: keep it out of ambient occlusion
     } else if (o.userData.realMaterial) {
       o.material = o.userData.realMaterial;
       o.castShadow = o.userData.realCastShadow;
       o.renderOrder = 0;
+      o.layers.set(0);
       delete o.userData.realMaterial;
       delete o.userData.realCastShadow;
     }

@@ -2,7 +2,7 @@ import { buildDoubleBed, buildSingleBed, buildWardrobe, buildNightstand, buildDe
 import { buildSofa, buildArmchair, buildCoffeeTable, buildTVStand, buildDiningTable, buildDiningChair, buildBookshelf } from '../furniture/builders/living.js';
 import {
   buildVase, buildSmallPlant, buildLargePlant, buildTableLamp, buildFloorLamp,
-  buildRectRug, buildRoundRug, buildWallArtSmall, buildWallArtLarge,
+  buildRectRug, buildLargeRug, buildRoundRug, buildWallArtSmall, buildWallArtLarge,
 } from '../furniture/builders/decor.js';
 
 /**
@@ -35,7 +35,7 @@ export const CATALOG = [
   { id: 'sofa', name: 'Sofa', category: 'Living & Dining', size: { w: 2.1, d: 0.9, h: 0.85 }, placement: 'floor', defaultColor: '#b9b9b4', build: buildSofa },
   { id: 'armchair', name: 'Armchair', category: 'Living & Dining', size: { w: 0.85, d: 0.85, h: 0.85 }, placement: 'floor', defaultColor: '#a9b8a3', build: buildArmchair },
   { id: 'coffeeTable', name: 'Coffee Table', category: 'Living & Dining', size: { w: 1.1, d: 0.6, h: 0.42 }, placement: 'floor', isSurface: true, surfaceHeight: 0.42, defaultColor: '#c9a77c', build: buildCoffeeTable },
-  { id: 'tvStand', name: 'TV Stand', category: 'Living & Dining', size: { w: 1.6, d: 0.4, h: 1.3 }, placement: 'floor', isSurface: true, surfaceHeight: 0.5, surfaceRect: { w: 1.6, d: 0.2, offsetZ: 0.1 }, defaultColor: '#f4f1ea', build: buildTVStand },
+  { id: 'tvStand', name: 'TV Stand', category: 'Living & Dining', size: { w: 1.6, d: 0.4, h: 1.3 }, placement: 'floor', isSurface: true, surfaceHeight: 0.5, surfaceRect: { w: 1.6, d: 0.25, offsetZ: 0.075 }, defaultColor: '#f4f1ea', build: buildTVStand },
   { id: 'diningTable', name: 'Dining Table', category: 'Living & Dining', size: { w: 1.4, d: 0.8, h: 0.75 }, placement: 'floor', isSurface: true, surfaceHeight: 0.75, defaultColor: '#c9a77c', build: buildDiningTable },
   { id: 'diningChair', name: 'Dining Chair', category: 'Living & Dining', size: { w: 0.45, d: 0.48, h: 0.85 }, placement: 'floor', defaultColor: '#e8e2d6', build: buildDiningChair },
   { id: 'bookshelf', name: 'Bookshelf', category: 'Living & Dining', size: { w: 0.8, d: 0.3, h: 1.8 }, placement: 'floor', defaultColor: '#f4f1ea', build: buildBookshelf },
@@ -47,6 +47,7 @@ export const CATALOG = [
   { id: 'tableLamp', name: 'Table Lamp', category: 'Decor', size: { w: 0.28, d: 0.28, h: 0.48 }, placement: 'surface', shape: 'round', defaultColor: '#f4f1ea', build: buildTableLamp },
   { id: 'floorLamp', name: 'Floor Lamp', category: 'Decor', size: { w: 0.4, d: 0.4, h: 1.6 }, placement: 'floor', shape: 'round', defaultColor: '#f4f1ea', build: buildFloorLamp },
   { id: 'rugRect', name: 'Rug (2.0 × 1.4)', category: 'Decor', size: { w: 2.0, d: 1.4, h: 0.012 }, placement: 'floor', layer: 'rug', defaultColor: '#e3d5bd', build: buildRectRug },
+  { id: 'rugLarge', name: 'Large Rug (2.6 × 1.9)', category: 'Decor', size: { w: 2.6, d: 1.9, h: 0.012 }, placement: 'floor', layer: 'rug', defaultColor: '#efe8db', build: buildLargeRug },
   { id: 'rugRound', name: 'Round Rug (Ø1.6)', category: 'Decor', size: { w: 1.6, d: 1.6, h: 0.012 }, placement: 'floor', layer: 'rug', shape: 'round', defaultColor: '#cfc6b6', build: buildRoundRug },
   { id: 'wallArtSmall', name: 'Wall Art (small)', category: 'Decor', size: { w: 0.5, d: 0.035, h: 0.7 }, placement: 'wall', defaultColor: '#c9a77c', build: buildWallArtSmall },
   { id: 'wallArtLarge', name: 'Wall Art (large)', category: 'Decor', size: { w: 1.0, d: 0.035, h: 0.7 }, placement: 'wall', defaultColor: '#3f3a36', build: buildWallArtLarge },

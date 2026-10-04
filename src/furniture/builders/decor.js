@@ -161,6 +161,15 @@ export function buildRectRug(color) {
   return g;
 }
 
+export function buildLargeRug(color) {
+  const g = new THREE.Group();
+  const m = primary(color, { roughness: 1, map: getRugTexture() });
+  const rug = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.012, 1.9), m);
+  rug.position.y = 0.006;
+  g.add(rug);
+  return g;
+}
+
 export function buildRoundRug(color) {
   const g = new THREE.Group();
   const m = primary(color, { roughness: 1, map: getRugTexture() });

@@ -14,6 +14,7 @@ import { DEFAULT_LAYOUT } from './data/defaultLayout.js';
 import { RoomMaterials } from './house/materials.js';
 import { buildHouse } from './house/buildHouse.js';
 import { buildFixtures } from './house/fixtures.js';
+import { buildSurroundings } from './house/surroundings.js';
 import { FurnitureManager } from './furniture/FurnitureManager.js';
 import { Placement } from './furniture/placement.js';
 import { Interaction } from './furniture/interaction.js';
@@ -26,13 +27,14 @@ import { MaterialsPanel } from './ui/materialsPanel.js';
 import { Minimap } from './ui/minimap.js';
 
 // ─── Scene & house ─────────────────────────────────────────────────────────
-const { renderer, scene, camera } = createScene(document.getElementById('app'));
+const { renderer, scene, camera, render } = createScene(document.getElementById('app'));
 
 const roomMaterials = new RoomMaterials(ROOMS);
 const house = buildHouse(roomMaterials);
 scene.add(house.group);
 const fixtures = buildFixtures();
 scene.add(fixtures.group);
+scene.add(buildSurroundings());
 
 /** Walls, door leaves and fixtures: never move. */
 const staticColliders = [...house.colliders, ...fixtures.colliders];
@@ -260,7 +262,7 @@ function exitPhotoMode() {
 }
 
 function takePhoto() {
-  renderer.render(scene, camera); // render right before reading the canvas
+  render(); // render right before reading the canvas
   const url = renderer.domElement.toDataURL('image/png');
   const a = document.createElement('a');
   a.href = url;
@@ -391,7 +393,7 @@ renderer.setAnimationLoop((time) => {
     hud.setHint(started ? 'Click to resume · B library · M materials · N day/night · Ctrl+Z undo' : '');
   }
   if (!photoMode) minimap.draw(camera, interaction.isHolding ? interaction.held.item.uid : null);
-  renderer.render(scene, camera);
+  render();
 });
 
 // Handy for debugging in the browser console.

@@ -29,11 +29,13 @@ export const DEFAULT_LAYOUT = {
     { uid: 'sofa1', catalogId: 'sofa', position: [0.57, 0, 5.6], rotationY: 90 },
     { uid: 't1', catalogId: 'coffeeTable', position: [1.75, 0, 5.6], rotationY: 90 },
     { uid: 'tv1', catalogId: 'tvStand', position: [3.3, 0, 5.6], rotationY: -90 },
+    { uid: 'plant2', catalogId: 'smallPlant', position: [3.225, 0.5, 6.1], rotationY: 0, parentUid: 'tv1' },
     { uid: 'flamp1', catalogId: 'floorLamp', position: [0.38, 0, 4.25], rotationY: 0 },
     { uid: 'bigPlant1', catalogId: 'largePlant', position: [3.62, 0, 7.05], rotationY: 0 },
     { uid: 'art1', catalogId: 'wallArtLarge', position: [0.121, 1.15, 5.6], rotationY: 90 },
 
     // ── Dining ──
+    { uid: 'rug2', catalogId: 'rugLarge', position: [5.5, 0, 5.6], rotationY: 0 },
     { uid: 'dt1', catalogId: 'diningTable', position: [5.5, 0, 5.6], rotationY: 0 },
     { uid: 'c1', catalogId: 'diningChair', position: [5.15, 0, 4.9], rotationY: 0 },
     { uid: 'c2', catalogId: 'diningChair', position: [5.85, 0, 4.9], rotationY: 0 },

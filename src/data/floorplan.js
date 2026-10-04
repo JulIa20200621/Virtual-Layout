@@ -78,6 +78,7 @@ export const OPENINGS = [
   { id: 'winBed2', type: 'window', wallId: 'extNorth', offset: 8.1 + HALF_EXT, width: 1.4, height: 1.4, sill: 0.9 },
   { id: 'winBath', type: 'window', wallId: 'extNorth', offset: 5.1 + HALF_EXT, width: 0.6, height: 0.5, sill: 1.7 }, // small high window
   { id: 'winLiving', type: 'window', wallId: 'extSouth', offset: 2.0 + HALF_EXT, width: 2.4, height: 1.4, sill: 0.9 }, // large living window
+  { id: 'winDining', type: 'window', wallId: 'extSouth', offset: 5.4 + HALF_EXT, width: 1.4, height: 1.4, sill: 0.9 },
   { id: 'winKitchen', type: 'window', wallId: 'extEast', offset: 5.6 - HALF_EXT, width: 1.2, height: 1.1, sill: 1.1 }, // above the counter
 ];
 

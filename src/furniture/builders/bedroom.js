@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { box, cyl, cushion, legs, primary, mat, woodMat, metalMat, darkMat } from './helpers.js';
+import { box, cyl, cushion, legs, primary, mat, woodMat, metalMat, darkMat, fabric as upholstery, woodPrimary } from './helpers.js';
+import { getFabricTexture } from './textures.js';
 
 /** Bed with frame, mattress, duvet, pillows and headboard (headboard at −Z). */
 function bed(width, color, pillowCount) {
@@ -7,9 +8,9 @@ function bed(width, color, pillowCount) {
     const g = new THREE.Group();
     const L = 2.0;
     const wood = woodMat();
-    const fabric = primary(color);
-    const white = mat('#f6f4ef', { roughness: 0.9 });
-    const duvetMat = mat('#ebe6dc', { roughness: 0.95 });
+    const fabric = upholstery(color);
+    const white = mat('#f6f4ef', { roughness: 0.95, map: getFabricTexture() });
+    const duvetMat = mat('#ebe6dc', { roughness: 0.95, map: getFabricTexture() });
 
     legs(g, width, L, 0.12, 0.06, wood, 0.03);
     box(g, width, 0.2, L, wood, 0, 0.12, 0); // frame
@@ -60,9 +61,9 @@ export function buildNightstand(color) {
 /** Desk with four legs and a small drawer. Surface. */
 export function buildDesk(color) {
   const g = new THREE.Group();
-  const top = primary(color, { roughness: 0.55 });
+  const top = woodPrimary(color);
   const frame = mat('#f2f0eb', { roughness: 0.6 });
-  box(g, 1.2, 0.03, 0.6, top, 0, 0.72, 0);
+  cushion(g, 1.2, 0.03, 0.6, top, 0, 0.72, 0); // rounded-edge top
   legs(g, 1.2, 0.6, 0.72, 0.04, frame, 0.03);
   box(g, 0.45, 0.12, 0.5, frame, 0.3, 0.6, 0); // drawer
   box(g, 0.12, 0.015, 0.01, darkMat(), 0.3, 0.655, 0.255);
@@ -72,7 +73,7 @@ export function buildDesk(color) {
 /** Office chair: star base, gas lift, seat, backrest at −Z. */
 export function buildDeskChair(color) {
   const g = new THREE.Group();
-  const seatMat = primary(color);
+  const seatMat = upholstery(color);
   const black = darkMat();
   const metal = metalMat();
   for (let i = 0; i < 5; i++) {

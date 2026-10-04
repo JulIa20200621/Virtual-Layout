@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { PLAN, WALLS, OPENINGS, ROOMS, roomAt } from '../data/floorplan.js';
+import { NO_AO_LAYER } from '../core/scene.js';
+import { getFabricTexture } from '../furniture/builders/textures.js';
 
 /**
  * Builds walls, floors, ceiling, windows and door leaves from the floor plan data.
@@ -27,6 +29,9 @@ export function buildHouse(roomMaterials) {
   });
   const doorMat = new THREE.MeshStandardMaterial({ color: '#f1eee8', roughness: 0.6 });
   const handleMat = new THREE.MeshStandardMaterial({ color: '#9a9a96', roughness: 0.3, metalness: 0.8 });
+  const skirtingMat = new THREE.MeshStandardMaterial({ color: '#fbfaf7', roughness: 0.6 });
+  const curtainMat = new THREE.MeshStandardMaterial({ color: '#f1ece2', roughness: 1, side: THREE.DoubleSide, map: getFabricTexture() });
+  const rodMat = new THREE.MeshStandardMaterial({ color: '#3a3936', roughness: 0.4, metalness: 0.6 });
 
   /** Meshes the player can aim at (walls). */
   const wallMeshes = [];
@@ -99,6 +104,10 @@ export function buildHouse(roomMaterials) {
           hz: horizontal ? t / 2 : pieceLen / 2,
           kind: 'wall',
         });
+        if (y0 === 0) {
+          addSkirting(horizontal, cx, cz, pieceLen, t, 1);
+          addSkirting(horizontal, cx, cz, pieceLen, t, -1);
+        }
       }
     }
 
@@ -109,6 +118,49 @@ export function buildHouse(roomMaterials) {
       if (o.type === 'window') addWindow(o, cx, cz, horizontal, t);
       else addDoorLeaf(o, wall, horizontal, t);
     }
+  }
+
+  /** Skirting board along one side of a wall piece (only on the side facing a room). */
+  function addSkirting(horizontal, cx, cz, len, t, side) {
+    const off = t / 2 + 0.05;
+    const inside = horizontal ? roomAt(cx, cz + side * off) : roomAt(cx + side * off, cz);
+    if (!inside) return;
+    const h = 0.08;
+    const d = 0.012;
+    const geo = horizontal ? new THREE.BoxGeometry(len, h, d) : new THREE.BoxGeometry(d, h, len);
+    const mesh = new THREE.Mesh(geo, skirtingMat);
+    const n = t / 2 + d / 2;
+    mesh.position.set(horizontal ? cx : cx + side * n, h / 2, horizontal ? cz + side * n : cz);
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  }
+
+  /** Floor-length linen curtains on both sides of a window, plus a rod. */
+  function addCurtains(win, o, cx, cz, horizontal, t) {
+    const off = t / 2 + 0.05;
+    const side = (horizontal ? roomAt(cx, cz + off) : roomAt(cx + off, cz)) ? 1 : -1; // interior = local ±Z
+    const wy = o.sill + o.height / 2; // window group's height
+    const top = H - 0.1;
+    const ch = top - 0.02;
+    const cw = 0.42;
+    for (const sx of [-1, 1]) {
+      const geo = new THREE.PlaneGeometry(cw, ch, 32, 1);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        pos.setZ(i, Math.sin(((x + cw / 2) / cw) * Math.PI * 7) * 0.025); // soft folds
+      }
+      geo.computeVertexNormals();
+      const curtain = new THREE.Mesh(geo, curtainMat);
+      curtain.position.set(sx * (o.width / 2 + cw / 2 - 0.06), 0.02 + ch / 2 - wy, side * (t / 2 + 0.08));
+      curtain.castShadow = true;
+      curtain.receiveShadow = true;
+      win.add(curtain);
+    }
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, o.width + 1.0, 12), rodMat);
+    rod.rotation.z = Math.PI / 2;
+    rod.position.set(0, top + 0.02 - wy, side * (t / 2 + 0.08));
+    win.add(rod);
   }
 
   function addWindow(o, cx, cz, horizontal, t) {
@@ -132,6 +184,7 @@ export function buildHouse(roomMaterials) {
     }
     const glass = new THREE.Mesh(new THREE.PlaneGeometry(o.width - fw, o.height - fw), glassMat);
     glass.renderOrder = 2;
+    glass.layers.set(NO_AO_LAYER); // don't let the glass darken things via ambient occlusion
     win.add(glass);
     // interior / exterior sill board
     if (o.sill > 0.1) {
@@ -140,6 +193,7 @@ export function buildHouse(roomMaterials) {
       sill.receiveShadow = true;
       win.add(sill);
     }
+    if (o.sill >= 0.5 && o.sill <= 1.0 && o.width >= 1) addCurtains(win, o, cx, cz, horizontal, t);
     group.add(win);
   }
 
@@ -211,16 +265,6 @@ export function buildHouse(roomMaterials) {
   ceiling.castShadow = true;
   ceiling.receiveShadow = true;
   group.add(ceiling);
-
-  // ─── Exterior ground ────────────────────────────────────────────────────
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(120, 120),
-    new THREE.MeshStandardMaterial({ color: '#d5d6d2', roughness: 1 }),
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.set(PLAN.width / 2, -0.01, PLAN.depth / 2);
-  ground.receiveShadow = true;
-  group.add(ground);
 
   return { group, wallMeshes, floorMeshes, colliders };
 }

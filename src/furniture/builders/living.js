@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { box, cyl, cushion, legs, primary, mat, woodMat, darkMat } from './helpers.js';
+import { box, cushion, legs, primary, mat, woodMat, darkMat, fabric as upholstery, woodPrimary } from './helpers.js';
+import { getFabricTexture } from './textures.js';
 import { seededRandom } from '../../house/materials.js';
 
 /** 3-seat sofa 2.1 × 0.9 × 0.85 (back at −Z). */
 export function buildSofa(color) {
   const g = new THREE.Group();
-  const fabric = primary(color);
+  const fabric = upholstery(color);
   const wood = woodMat();
   const W = 2.1;
   const D = 0.9;
@@ -21,13 +22,19 @@ export function buildSofa(color) {
     const back = cushion(g, seatW - 0.02, 0.38, 0.14, fabric, x, 0.45, -D / 2 + 0.25); // back cushions
     back.rotation.x = -0.12;
   }
+  // Two accent throw pillows in the corners
+  const pillow = mat('#e9e3d8', { roughness: 1, map: getFabricTexture() });
+  for (const sx of [-1, 1]) {
+    const p = cushion(g, 0.42, 0.4, 0.13, pillow, sx * (W / 2 - armW - 0.25), 0.44, -D / 2 + 0.38);
+    p.rotation.set(-0.25, sx * -0.25, sx * 0.08);
+  }
   return g;
 }
 
 /** Armchair 0.85 × 0.85 × 0.85. */
 export function buildArmchair(color) {
   const g = new THREE.Group();
-  const fabric = primary(color);
+  const fabric = upholstery(color);
   const wood = woodMat();
   legs(g, 0.8, 0.8, 0.14, 0.04, wood, 0.06, true);
   cushion(g, 0.85, 0.22, 0.85, fabric, 0, 0.14, 0);
@@ -41,9 +48,9 @@ export function buildArmchair(color) {
 /** Coffee table 1.1 × 0.6 × 0.42 with lower shelf. Surface. */
 export function buildCoffeeTable(color) {
   const g = new THREE.Group();
-  const top = primary(color, { roughness: 0.5 });
+  const top = woodPrimary(color);
   const wood = woodMat();
-  box(g, 1.1, 0.04, 0.6, top, 0, 0.38, 0);
+  cushion(g, 1.1, 0.04, 0.6, top, 0, 0.38, 0); // rounded-edge top
   legs(g, 1.1, 0.6, 0.38, 0.045, wood, 0.04, true);
   box(g, 0.96, 0.02, 0.46, wood, 0, 0.12, 0);
   return g;
@@ -69,8 +76,8 @@ export function buildTVStand(color) {
 /** Dining table 1.4 × 0.8 × 0.75. Surface. */
 export function buildDiningTable(color) {
   const g = new THREE.Group();
-  const top = primary(color, { roughness: 0.5 });
-  box(g, 1.4, 0.035, 0.8, top, 0, 0.715, 0);
+  const top = woodPrimary(color);
+  cushion(g, 1.4, 0.035, 0.8, top, 0, 0.715, 0); // rounded-edge top
   legs(g, 1.4, 0.8, 0.715, 0.05, woodMat(), 0.06, true);
   box(g, 1.2, 0.07, 0.62, woodMat(), 0, 0.645, 0); // apron
   return g;
@@ -80,7 +87,7 @@ export function buildDiningTable(color) {
 export function buildDiningChair(color) {
   const g = new THREE.Group();
   const wood = woodMat();
-  const seat = primary(color);
+  const seat = upholstery(color);
   legs(g, 0.44, 0.44, 0.43, 0.035, wood, 0.01, true);
   cushion(g, 0.45, 0.05, 0.45, seat, 0, 0.43, 0);
   // back posts + rail
