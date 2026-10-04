@@ -53,20 +53,23 @@ export function buildSurroundings() {
   }
 
   // Distant buildings with a window-grid facade
-  const facade = makeFacadeCanvas();
-  const tints = ['#e9e5dd', '#d9d6d0', '#cfd3d6', '#e3ddd2', '#c6c9c9', '#ece9e3'];
+  // One shared facade texture; each building scales its own UVs instead of cloning the texture.
+  const facadeTex = new THREE.CanvasTexture(makeFacadeCanvas());
+  facadeTex.colorSpace = THREE.SRGBColorSpace;
+  facadeTex.wrapS = facadeTex.wrapT = THREE.RepeatWrapping;
+  const facadeMats = ['#e9e5dd', '#d9d6d0', '#cfd3d6', '#e3ddd2', '#c6c9c9', '#ece9e3'].map(
+    (c) => new THREE.MeshStandardMaterial({ color: c, map: facadeTex, roughness: 0.85 }),
+  );
   for (let i = 0; i < 34; i++) {
     const ang = (i / 34) * Math.PI * 2 + rand() * 0.12;
     const dist = 38 + rand() * 30;
     const w = 10 + rand() * 14;
     const d = 10 + rand() * 12;
     const h = 12 + rand() * 38;
-    const tex = new THREE.CanvasTexture(facade);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(Math.round(w / 3.2), Math.round(h / 3.2)); // ~3.2 m per window bay / floor
-    const mat = new THREE.MeshStandardMaterial({ color: tints[i % tints.length], map: tex, roughness: 0.85 });
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const uv = geo.attributes.uv;
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) * Math.round(w / 3.2), uv.getY(k) * Math.round(h / 3.2)); // ~3.2 m per bay / floor
+    const b = new THREE.Mesh(geo, facadeMats[i % facadeMats.length]);
     b.position.set(cx + Math.cos(ang) * dist, h / 2 - 0.02, cz + Math.sin(ang) * dist);
     b.rotation.y = -ang + (rand() - 0.5) * 0.3;
     group.add(b);

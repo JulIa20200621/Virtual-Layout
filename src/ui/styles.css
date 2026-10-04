@@ -505,3 +505,20 @@ body.photo .panel {
     font-size: 13px;
   }
 }
+
+/* Small render-progress label, only visible in photo mode (not part of saved pictures) */
+#photo-status {
+  position: fixed;
+  left: 16px;
+  bottom: 14px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(30, 30, 28, 0.45);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  pointer-events: none;
+  display: none;
+}
+body.photo #photo-status {
+  display: block;
+}

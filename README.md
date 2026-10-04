@@ -40,7 +40,7 @@ Other commands:
 | B | Furniture library |
 | M | Materials (per-room floor and walls, furniture color) |
 | N | Day / night |
-| P | Photo mode: hides all UI; click saves a PNG, Esc exits |
+| P | Photo mode: hides all UI and switches to a path-traced realistic render (hold still for a few seconds); click saves a PNG, Esc exits |
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo |
 | Esc | Release the mouse and show the toolbar |
 

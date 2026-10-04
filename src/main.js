@@ -25,6 +25,7 @@ import { createToolbar } from './ui/toolbar.js';
 import { LibraryPanel } from './ui/libraryPanel.js';
 import { MaterialsPanel } from './ui/materialsPanel.js';
 import { Minimap } from './ui/minimap.js';
+import { PhotoRenderer } from './core/photoRenderer.js';
 
 // ─── Scene & house ─────────────────────────────────────────────────────────
 const { renderer, scene, camera, render } = createScene(document.getElementById('app'));
@@ -235,6 +236,9 @@ refreshToolbar();
 // ─── Pointer lock & mouse ──────────────────────────────────────────────────
 let started = false;
 let photoMode = false;
+/** Path-traced "realistic render" used in photo mode. */
+const photo = new PhotoRenderer(renderer, scene, camera, render, lighting);
+const photoStatus = document.getElementById('photo-status');
 
 function updateMode() {
   hud.setMode({ locked: player.isLocked, started, panelOpen: anyPanelOpen() });
@@ -252,17 +256,35 @@ function enterPhotoMode() {
   started = true;
   if (!player.isLocked) player.lock();
   updateMode();
-  hud.toast('Photo mode · click to save a picture · Esc to exit', 2500);
+  photoStatus.textContent = 'Preparing realistic render…';
+  hud.toast('Photo mode · hold still for a realistic render · click to save · Esc to exit', 3500);
+  // Let the UI update first: building the path tracing scene takes a moment.
+  setTimeout(() => {
+    if (!photoMode) return;
+    try {
+      photo.start();
+    } catch (err) {
+      console.error(err);
+      hud.toast('Realistic render is not supported on this device — showing the normal view', 4000);
+    }
+  }, 60);
 }
 
 function exitPhotoMode() {
   if (!photoMode) return;
   photoMode = false;
+  photo.stop();
   updateMode();
 }
 
+/** Render the current frame (path traced in photo mode). */
+function renderFrame() {
+  if (photoMode && photo.active) photo.render();
+  else render();
+}
+
 function takePhoto() {
-  render(); // render right before reading the canvas
+  renderFrame(); // render right before reading the canvas
   const url = renderer.domElement.toDataURL('image/png');
   const a = document.createElement('a');
   a.href = url;
@@ -318,7 +340,11 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Escape' || e.code === 'KeyP') {
       exitPhotoMode();
       player.unlock();
-    } else if (e.code === 'KeyN') toggleDayNight();
+    } else if (e.code === 'KeyN') {
+      toggleDayNight();
+      lighting.setNight(lighting.isNight, true); // switch instantly in photo mode
+      photo.refresh();
+    }
     return;
   }
 
@@ -385,6 +411,10 @@ renderer.setAnimationLoop((time) => {
   if (photoMode) {
     hud.setTooltip('');
     hud.setHint('');
+    if (photo.active) {
+      const n = photo.samples;
+      photoStatus.textContent = n < 1 ? 'Hold still to render…' : n < 300 ? `Rendering · ${Math.floor(n)} samples` : `Done · ${Math.floor(n)} samples · click to save`;
+    }
   } else if (player.isLocked) {
     hud.setTooltip(interaction.tooltip());
     hud.setHint(interaction.hint());
@@ -393,8 +423,8 @@ renderer.setAnimationLoop((time) => {
     hud.setHint(started ? 'Click to resume · B library · M materials · N day/night · Ctrl+Z undo' : '');
   }
   if (!photoMode) minimap.draw(camera, interaction.isHolding ? interaction.held.item.uid : null);
-  render();
+  renderFrame();
 });
 
 // Handy for debugging in the browser console.
-window.app = { scene, camera, manager, history, roomMaterials, lighting, interaction, placement, materialsPanel, togglePanel, resetLayout, enterPhotoMode, exitPhotoMode };
+window.app = { scene, camera, manager, history, roomMaterials, lighting, interaction, placement, materialsPanel, togglePanel, resetLayout, enterPhotoMode, exitPhotoMode, photo };
