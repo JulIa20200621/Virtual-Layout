@@ -1,29 +1,79 @@
 import * as THREE from 'three';
 import { box, cyl, cushion, legs, primary, mat, woodMat, metalMat, darkMat, fabric as upholstery, woodPrimary } from './helpers.js';
 import { getFabricTexture } from './textures.js';
+import { drapeGeometry, pillowGeometry } from './softGeometry.js';
 
-/** Bed with frame, mattress, duvet, pillows and headboard (headboard at −Z). */
+/**
+ * Bed (headboard at −Z): wooden frame, mattress, a duvet that drapes over the sides
+ * and foot, a folded-back top sheet, plump pillows, a throw blanket in the item's
+ * color and a channel-tufted upholstered headboard.
+ */
 function bed(width, color, pillowCount) {
   return () => {
     const g = new THREE.Group();
     const L = 2.0;
     const wood = woodMat();
     const fabric = upholstery(color);
-    const white = mat('#f6f4ef', { roughness: 0.95, map: getFabricTexture() });
-    const duvetMat = mat('#ebe6dc', { roughness: 0.95, map: getFabricTexture() });
+    const white = mat('#f7f5f1', { roughness: 0.95, map: getFabricTexture() });
+    const linen = mat('#ece6db', { roughness: 0.95, map: getFabricTexture(), side: THREE.DoubleSide });
+    const sheet = mat('#f8f6f2', { roughness: 0.95, map: getFabricTexture(), side: THREE.DoubleSide });
+    const throwMat = upholstery(color, { side: THREE.DoubleSide });
 
-    legs(g, width, L, 0.12, 0.06, wood, 0.03);
-    box(g, width, 0.2, L, wood, 0, 0.12, 0); // frame
-    cushion(g, width - 0.06, 0.22, L - 0.08, white, 0, 0.3, 0.02); // mattress
-    cushion(g, width - 0.02, 0.07, L * 0.62, duvetMat, 0, 0.5, L * 0.18); // duvet
-    cushion(g, width + 0.02, 0.04, 0.35, fabric, 0, 0.53, L * 0.36); // throw blanket
-    const pw = pillowCount === 1 ? width * 0.7 : width / 2 - 0.08;
+    const zHead = -L / 2; // back of the headboard
+    const zMat = zHead + 0.11; // mattress head end
+    const zFoot = L / 2 - 0.02; // mattress foot end
+    const mattW = width - 0.06;
+    const mattTop = 0.52;
+
+    // Frame & legs
+    legs(g, width - 0.04, L - 0.1, 0.13, 0.05, wood, 0.05, true);
+    cushion(g, width, 0.2, L - 0.05, wood, 0, 0.12, 0.025);
+
+    // Mattress
+    cushion(g, mattW, 0.22, zFoot - zMat, white, 0, mattTop - 0.22, (zMat + zFoot) / 2);
+
+    // Duvet (puffy, hangs over sides & foot)
+    const duvetZ0 = zMat + 0.5;
+    const duvet = new THREE.Mesh(
+      drapeGeometry({ width: mattW, z0: duvetZ0, z1: zFoot, top: mattTop + 0.004, hang: 0.2, r: 0.04, puff: 0.06 }),
+      linen,
+    );
+    g.add(duvet);
+    // Folded-back top sheet over the duvet's head edge
+    g.add(new THREE.Mesh(
+      drapeGeometry({ width: mattW + 0.01, z0: duvetZ0 - 0.02, z1: duvetZ0 + 0.26, top: mattTop + 0.012, hang: 0.12, r: 0.045, puff: 0.06, puffZ0: duvetZ0, hangFoot: false }),
+      sheet,
+    ));
+    // Throw blanket across the foot, in the bed's color
+    g.add(new THREE.Mesh(
+      drapeGeometry({ width: mattW + 0.012, z0: zFoot - 0.55, z1: zFoot, top: mattTop + 0.012, hang: 0.26, r: 0.048, puff: 0.06, puffZ0: duvetZ0, wrinkle: 0.003 }),
+      throwMat,
+    ));
+
+    // Pillows leaning against the headboard
+    const pw = pillowCount === 1 ? Math.min(0.62, mattW - 0.12) : mattW / 2 - 0.06;
     for (let i = 0; i < pillowCount; i++) {
-      const x = pillowCount === 1 ? 0 : (i === 0 ? -1 : 1) * (width / 4 + 0.01);
-      const p = cushion(g, pw, 0.13, 0.4, white, x, 0.5, -L / 2 + 0.32);
-      p.rotation.x = -0.25;
+      const x = pillowCount === 1 ? 0 : (i === 0 ? -1 : 1) * (pw / 2 + 0.03);
+      const p = new THREE.Mesh(pillowGeometry(pw, 0.17, 0.44), white);
+      p.position.set(x, mattTop + 0.1, zMat + 0.24);
+      p.rotation.x = -0.45;
+      g.add(p);
     }
-    cushion(g, width, 1.0, 0.08, fabric, 0, 0, -L / 2 + 0.04); // upholstered headboard
+    // Small accent cushion in front (double bed)
+    if (pillowCount > 1) {
+      const c = new THREE.Mesh(pillowGeometry(0.45, 0.13, 0.3), fabric);
+      c.position.set(0, mattTop + 0.1, zMat + 0.47);
+      c.rotation.x = -0.6;
+      g.add(c);
+    }
+
+    // Channel-tufted headboard
+    box(g, width, 1.0, 0.05, wood, 0, 0, zHead + 0.025);
+    const channels = Math.round(width / 0.2);
+    const cw = width / channels;
+    for (let i = 0; i < channels; i++) {
+      cushion(g, cw - 0.008, 0.72, 0.06, fabric, -width / 2 + cw * (i + 0.5), 0.27, zHead + 0.08);
+    }
     return g;
   };
 }
